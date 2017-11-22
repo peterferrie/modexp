@@ -1,5 +1,5 @@
 ;
-;  Copyright © 2016 Odzhan, Peter Ferrie. All Rights Reserved.
+;  Copyright © 2016,2017 Odzhan, Peter Ferrie. All Rights Reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
 ;  modification, are permitted provided that the following conditions are
@@ -30,7 +30,7 @@
 ; -----------------------------------------------
 ; Modular Exponetiation in x86 assembly
 ;
-; size: 140 bytes or 143 for slightly faster version
+; size: 138 bytes or 141 for slightly faster version
 ;
 ; global calls use cdecl convention
 ;
@@ -72,23 +72,20 @@ mm_l1:
     push   edi               ; save edi
     ; r=x
     sub    esp, ecx          ; create space for r and assign x
+    ; t=b
+    sub    esp, ecx          ; create space for t and assign b
     mov    edi, esp
-    pushad
+    push   ecx
+    rep    movsb
+    pop    ecx
+    mov    esi, esp
+    push   ecx
     dec    ecx               ; skip 1
     xchg   eax, edx          ; r=x
     stosb
     xor    al, al            ; zero remainder of buffer
     rep    stosb
-    popad
-    ; *************
-    ; t=b
-    sub    esp, ecx          ; create space for t and assign b
-    mov    eax, esp
-    pushad
-    xchg   eax, edi
-    rep    movsb
-    popad
-    xchg   eax, esi          
+    pop    ecx
     call   ld_fn
     
 ; cf=1 : r = addmod (r, t, m);
